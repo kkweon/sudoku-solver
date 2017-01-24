@@ -1,6 +1,5 @@
 assignments = []
 
-
 def assign_value(values, box, value):
     """
     Please use this function to update your values dictionary!
@@ -10,7 +9,6 @@ def assign_value(values, box, value):
     if len(value) == 1:
         assignments.append(values.copy())
     return values
-
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -35,7 +33,6 @@ def grid_values(grid):
     "Convert grid into a dict of {square: char} with '.' for empties."
     pass
 
-
 def display(values):
     "Display these values as a 2-D grid."
     pass
@@ -45,7 +42,6 @@ def eliminate(values):
 
 def only_choice(values):
     pass
-
 
 def reduce_puzzle(values):
     pass
@@ -68,8 +64,6 @@ if __name__ == '__main__':
         visualize_assignments(assignments)
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
-
-
 
     #   | 1 | 2 | 3 | ...
     # A |   |   |   | ...
