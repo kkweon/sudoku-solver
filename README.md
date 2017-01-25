@@ -3,11 +3,11 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: A new constraint, *the Naked Twins*, has been implemented. If there exists Naked Twins, its digits should be removed from peers of the twins. During constraint propagation, `naked_twin` is called to do this step after checking `only_choice`.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: A new constraint, `diagonal_units`, has to be created, so each step of constraint checking(`eliminate`, `only_choice`, ...) checks not only row/column/square units but also diagonal units.
 
 ### Install
 
