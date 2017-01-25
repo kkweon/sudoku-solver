@@ -24,30 +24,27 @@ def naked_twins(values):
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
-    for unit in unit_list:
-        # check there are two boxes in unit that has same length(2) and same
-        # values
-        box_len_2_list = [box for box in unit if len(values[box]) == 2]
-        # check if two exact same boxes belong to this list
-        tmp = []
-        for i in range(len(box_len_2_list) - 1):
-            first_pick = box_len_2_list[i]
-            for j in range(i+1, len(box_len_2_list)):
-                second_pick = box_len_2_list[j]
-                if values[first_pick] == values[second_pick]:
-                    tmp.append([first_pick, second_pick])
+    possible_unsolved_boxes = [box for box in boxes if len(values[box]) == 2]
 
-        if len(tmp) == 1:
-            f_box = tmp[0][0]
-            s_box = tmp[0][1]
-            digits = values[f_box]
-            for digit in digits:
-                for box in unit:
-                    if box not in tmp[0]:
-                        values = assign_value(values, box, values[box].replace(digit, ''))
+    for i in range(len(possible_unsolved_boxes) - 1):
+        first_box = possible_unsolved_boxes[i]
+        digits = values[first_box]
+        for j in range(i + 1, len(possible_unsolved_boxes)):
+            second_box = possible_unsolved_boxes[j]
+
+            # if they have same value
+            # check if they belong to the same unit
+            # if true, it's naked twins
+            if values[second_box] == digits:
+                for unit in units[first_box]:
+                    if second_box in unit:
+                        # Found Naked Twins:
+                        for box in unit:
+                            if box not in (first_box, second_box):
+                                for digit in digits:
+                                    values = assign_value(values, box, values[box].replace(digit, ''))
 
     return values
-
 
 def cross(A, B):
     "Cross product of elements in A and elements in B."
@@ -64,22 +61,18 @@ def grid_values(grid):
 
 def display(values):
     "Display these values as a 2-D grid."
-    msg = """
-|-------+-------+-------|
-| {A1} {A2} {A3} | {A4} {A5} {A6} | {A7} {A8} {A9} |
-| {B1} {B2} {B3} | {B4} {B5} {B6} | {B7} {B8} {B9} |
-| {C1} {C2} {C3} | {C4} {C5} {C6} | {C7} {C8} {C9} |
-|-------+-------+-------|
-| {D1} {D2} {D3} | {D4} {D5} {D6} | {D7} {D8} {D9} |
-| {E1} {E2} {E3} | {E4} {E5} {E6} | {E7} {E8} {E9} |
-| {F1} {F2} {F3} | {F4} {F5} {F6} | {F7} {F8} {F9} |
-|-------+-------+-------|
-| {G1} {G2} {G3} | {G4} {G5} {G6} | {G7} {G8} {G9} |
-| {H1} {H2} {H3} | {H4} {H5} {H6} | {H7} {H8} {H9} |
-| {I1} {I2} {I3} | {I4} {I5} {I6} | {I7} {I8} {I9} |
-|-------+-------+-------|
-""".format(**values)
-    print(msg)
+    msg = ""
+    width = 1 + max(len(values[box]) for box in values.keys())
+    line = "+".join(["-" * (width*3)] * 3)
+    print("")
+    for r in rows:
+        row_print = "".join([values[r+c].center(width)  + "|" if c in "36" else values[r+c].center(width)  for c in cols])
+        if r in "CF":
+            row_print += "\n" + line
+        print(row_print)
+        msg += row_print + "\n"
+    print("")
+
     return msg
 
 
@@ -103,7 +96,7 @@ def eliminate(values):
 
 
 def only_choice(values):
-    for unit in unit_list:
+    for unit in unitlist:
         for digit in '123456789':
             digit_places = [box for box in unit if digit in values[box]]
             if len(digit_places) == 1:
@@ -120,6 +113,7 @@ def reduce_puzzle(values):
 
         values = eliminate(values)
         values = only_choice(values)
+        #values = naked_twins(values)
 
         after_reduce_values = values
 
@@ -133,7 +127,6 @@ def solve(grid):
     values = grid_values(grid)
     return search(values)
 
-
 def search(values):
     values = reduce_puzzle(values)
     if not values:
@@ -141,7 +134,7 @@ def search(values):
         return values
 
     if max([len(values[box]) for box in values.keys()]) == 1:
-        # solved sudoku
+        # solved sudoku and returns values
         return values
 
     min_len, min_box = min([(len(values[box]), box) for box in values.keys() if len(values[box]) > 1])
@@ -155,7 +148,7 @@ def search(values):
         result = search(values_copy)
 
         if result:
-            # if search returns values
+            # only return when result is not false
             return result
 
 
@@ -179,9 +172,9 @@ square_units = [cross(rs, cs) for rs in ["ABC", "DEF", "GHI"] for cs in ["123", 
 
 diagonal_units = [[r + c for r, c in zip(rows, cols)]] + [[r + c for r, c in zip(rows, cols[::-1])]]
 
-unit_list = row_units + col_units + square_units + diagonal_units
+unitlist = row_units + col_units + square_units + diagonal_units
 
-units = dict([(box, [unit for unit in unit_list if box in unit])
+units = dict([(box, [unit for unit in unitlist if box in unit])
               for box in boxes])
 peers = dict([(box, set(sum(units[box], [])) - set([box])) for box in boxes])
 
@@ -189,7 +182,7 @@ peers = dict([(box, set(sum(units[box], [])) - set([box])) for box in boxes])
 if __name__ == '__main__':
     ############## GIVEN CODE BELOW ####################
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    display(solve(grid_values(diag_sudoku_grid)))
+    display(solve(diag_sudoku_grid))
 
     try:
         from visualize import visualize_assignments
