@@ -38,6 +38,7 @@ def naked_twins(values):
                 for unit in units[first_box]:
                     if second_box in unit:
                         # Found Naked Twins:
+                        # if Found, remove the digit from its peers except the naked twins
                         for box in unit:
                             if box not in (first_box, second_box):
                                 for digit in digits:
@@ -68,6 +69,7 @@ def grid_values(grid):
 def display(values):
     """
     Display the values as a 2-D grid.
+    
     Args:
         values(dict): The sudoku in dictionary form
     """
@@ -94,6 +96,9 @@ def eliminate(values):
                             "D4": "1" if known
                        }
     """
+
+    # Find solved places and its digit
+    # Remove the digit from the peers of each solved place
     solved_places = [box for box in boxes if len(values[box]) == 1]
     for box in solved_places:
         digit = values[box]
@@ -105,6 +110,9 @@ def eliminate(values):
 
 
 def only_choice(values):
+    # for box in each unit
+    # check if a box has unique digit among boxes in the same unit
+    # if it does, the box should have that digit assigned
     for unit in unitlist:
         for digit in '123456789':
             digit_places = [box for box in unit if digit in values[box]]
@@ -114,20 +122,25 @@ def only_choice(values):
 
 
 def reduce_puzzle(values):
-    solved_values = [box for box in boxes if len(values[box]) == 1]
     stalled = False
 
     while not stalled:
+        # go through eliminate -> only choice -> naked twins
+        # if the values did not change after that, it's stalled and just return values
+        # if one box has length of 0, there is a problem => return False
         before_reduce_values = values.copy()
 
         values = eliminate(values)
         values = only_choice(values)
-        #values = naked_twins(values)
+        values = naked_twins(values)
 
         after_reduce_values = values
 
         if before_reduce_values == after_reduce_values:
             stalled = True
+
+        if len([box for box in values.keys() if len(values[box]) == 0]):
+            return False
 
     return values
 
@@ -139,29 +152,30 @@ def solve(grid):
 def search(values):
     values = reduce_puzzle(values)
     if not values:
-        # values is stalled -> False
+        # reduce_puzzle can't solve -> return False
         return values
 
     if max([len(values[box]) for box in values.keys()]) == 1:
-        # solved sudoku and returns values
+        # solved sudoku -> returns values
         return values
 
     min_len, min_box = min([(len(values[box]), box) for box in values.keys() if len(values[box]) > 1])
 
     for i in values[min_box]:
-        # values[min_box] = "1234"
-        # i = "1", "2", "3", "4"
+        # choose each case of values[min_box]
+        # e.g. values[min_box] = "1234"
+        # e.g. i = "1", "2", "3", "4"
         values_copy = values.copy()
         values_copy[min_box] = i
 
         result = search(values_copy)
 
         if result:
-            # only return when result is not false
+            # only return when result has some values 
             return result
 
 
-# Global Variables
+##### Global Variables BEGINS HERE #####
 rows = "ABCDEFGHI"
 cols = "123456789"
 
@@ -178,15 +192,16 @@ square_units = [cross(rs, cs) for rs in ["ABC", "DEF", "GHI"] for cs in ["123", 
 # returns a square unit list. [square1, square2, ..., square9] where
 # square1 = ['A1', 'A2', 'A3', 'B1', 'B2', ..., 'C3']
 
-
 diagonal_units = [[r + c for r, c in zip(rows, cols)]] + [[r + c for r, c in zip(rows, cols[::-1])]]
+# [diag1, diag2] where diag1 = from left-top to right-bottom
+# diag2 = from right-top to left-bottom
 
 unitlist = row_units + col_units + square_units + diagonal_units
 
 units = dict([(box, [unit for unit in unitlist if box in unit])
               for box in boxes])
 peers = dict([(box, set(sum(units[box], [])) - set([box])) for box in boxes])
-
+##### Global Variables ENDS HERE #####
 
 if __name__ == '__main__':
     ############## GIVEN CODE BELOW ####################
