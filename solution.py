@@ -1,5 +1,6 @@
 assignments = []
 
+
 def assign_value(values, box, value):
     """
     Please use this function to update your values dictionary!
@@ -9,6 +10,7 @@ def assign_value(values, box, value):
     if len(value) == 1:
         assignments.append(values.copy())
     return values
+
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -22,6 +24,29 @@ def naked_twins(values):
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
+    for unit in unit_list:
+        # check there are two boxes in unit that has same length(2) and same
+        # values
+        box_len_2_list = [box for box in unit if len(values[box]) == 2]
+        # check if two exact same boxes belong to this list
+        tmp = []
+        for i in range(len(box_len_2_list) - 1):
+            first_pick = box_len_2_list[i]
+            for j in range(i+1, len(box_len_2_list)):
+                second_pick = box_len_2_list[j]
+                if values[first_pick] == values[second_pick]:
+                    tmp.append([first_pick, second_pick])
+
+        if len(tmp) == 1:
+            f_box = tmp[0][0]
+            s_box = tmp[0][1]
+            digits = values[f_box]
+            for digit in digits:
+                for box in unit:
+                    if box not in tmp[0]:
+                        values = assign_value(values, box, values[box].replace(digit, ''))
+
+    return values
 
 
 def cross(A, B):
@@ -35,6 +60,7 @@ def grid_values(grid):
     assert len(values) == 81
 
     return dict(zip(boxes, values))
+
 
 def display(values):
     "Display these values as a 2-D grid."
@@ -52,14 +78,14 @@ def display(values):
 | {H1} {H2} {H3} | {H4} {H5} {H6} | {H7} {H8} {H9} |
 | {I1} {I2} {I3} | {I4} {I5} {I6} | {I7} {I8} {I9} |
 |-------+-------+-------|
-""".format(**values) 
+""".format(**values)
     print(msg)
     return msg
 
 
 def eliminate(values):
     """Remove the digit of each known places from its peers
-    
+
     Args:
         values (dict): {
                             "C1": "123456789" if unknown places
@@ -75,6 +101,7 @@ def eliminate(values):
 
     return values
 
+
 def only_choice(values):
     for unit in unit_list:
         for digit in '123456789':
@@ -83,24 +110,60 @@ def only_choice(values):
                 values = assign_value(values, digit_places[0], digit)
     return values
 
+
 def reduce_puzzle(values):
-    solved_values = [box for box]
-    pass
+    solved_values = [box for box in boxes if len(values[box]) == 1]
+    stalled = False
+
+    while not stalled:
+        before_reduce_values = values.copy()
+
+        values = eliminate(values)
+        values = only_choice(values)
+
+        after_reduce_values = values
+
+        if before_reduce_values == after_reduce_values:
+            stalled = True
+
+    return values
 
 
 def solve(grid):
-    pass
+    values = grid_values(grid)
+    return search(values)
 
 
 def search(values):
-    pass
+    values = reduce_puzzle(values)
+    if not values:
+        # values is stalled -> False
+        return values
+
+    if max([len(values[box]) for box in values.keys()]) == 1:
+        # solved sudoku
+        return values
+
+    min_len, min_box = min([(len(values[box]), box) for box in values.keys() if len(values[box]) > 1])
+
+    for i in values[min_box]:
+        # values[min_box] = "1234"
+        # i = "1", "2", "3", "4"
+        values_copy = values.copy()
+        values_copy[min_box] = i
+
+        result = search(values_copy)
+
+        if result:
+            # if search returns values
+            return result
 
 
 # Global Variables
 rows = "ABCDEFGHI"
 cols = "123456789"
 
-boxes = cross(rows, cols) 
+boxes = cross(rows, cols)
 # returns each "box" of grid => ["A1", ..., "I9"]
 
 row_units = [cross(r, cols) for r in rows]
@@ -109,25 +172,27 @@ row_units = [cross(r, cols) for r in rows]
 col_units = [cross(rows, c) for c in cols]
 # returns a column unit list. [col1, col2, ..., col9] where col1 = ["A1", "B1", ..., "I1"]
 
-square_units = [cross(rs, cs) for rs in ["ABC", "DEF", "GHI"] for cs in ["123", "456", "789"]] 
-# returns a square unit list. [square1, square2, ..., square9] where square1 = ['A1', 'A2', 'A3', 'B1', 'B2', ..., 'C3']
+square_units = [cross(rs, cs) for rs in ["ABC", "DEF", "GHI"] for cs in ["123", "456", "789"]]
+# returns a square unit list. [square1, square2, ..., square9] where
+# square1 = ['A1', 'A2', 'A3', 'B1', 'B2', ..., 'C3']
 
-unit_list = row_units + col_units + square_units
 
-units = dict([(box, [unit for unit in unit_list if box in unit]) for box in boxes])
+diagonal_units = [[r + c for r, c in zip(rows, cols)]] + [[r + c for r, c in zip(rows, cols[::-1])]]
+
+unit_list = row_units + col_units + square_units + diagonal_units
+
+units = dict([(box, [unit for unit in unit_list if box in unit])
+              for box in boxes])
 peers = dict([(box, set(sum(units[box], [])) - set([box])) for box in boxes])
 
 
 if __name__ == '__main__':
     ############## GIVEN CODE BELOW ####################
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    #display(solve(grid_values(diag_sudoku_grid)))
+    display(solve(grid_values(diag_sudoku_grid)))
 
     try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)
     except:
         print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
-
-
-
