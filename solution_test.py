@@ -1,6 +1,31 @@
 import solution
 import unittest
 
+from utils import *
+
+
+class TestCreatePuzzle(unittest.TestCase):
+    def test_values_to_grid(self):
+        values = {"A1": "1234", "A2":"1"}
+        self.assertEqual(values_to_grid(values), ".1" + "."*(72+7))
+
+        values = {"A1": "4", "A2":"1"}
+        self.assertEqual(values_to_grid(values), "41" + "."*(72+7))
+
+    def test_can_create_puzzle_return_string(self):
+        self.assertEqual(type(create_puzzle(12)), str)
+
+    def test_can_create_puzzle_create_81_units(self):
+        self.assertEqual(len(create_puzzle(12)), 81)
+
+    def test_can_create_puzzle(self):
+        puzzle = create_puzzle(12)
+        values = solution.solve(puzzle)
+        self.assertTrue(all([len(values[box]) == 1 for box in values]))
+        for unit in solution.square_units:
+            value_list = set([values[box] for box in unit])
+            self.assertEqual(value_list, set("123456789"))
+
 
 class TestNakedTwins(unittest.TestCase):
     before_naked_twins_1 = {'I6': '4', 'H9': '3', 'I2': '6', 'E8': '1', 'H3': '5', 'H7': '8', 'I7': '1', 'I4': '8',
@@ -95,10 +120,81 @@ class TestDiagonalSudoku(unittest.TestCase):
         self.assertEqual(solution.solve(self.diagonal_grid), self.solved_diag_sudoku)
 
 
+    def test_can_solve_diagonal_sudoku(self):
+        test_grid = '.89.54...........9.....7.....6..2..41...4...33..7..6.....6.....5...........41.59.'
+        answer_grid = "289354176437861259615927348956132784178546923324789615741695832593278461862413597"
+
+        self.assertEqual(solution.solve(test_grid), solution.grid_values(answer_grid))
+
+        test_grid = "..75..84.652148.9.4.8732.158.6491.5392.....6114.3269.823.9571.6.8.613524.61..47.."
+        answer_grid = "317569842652148397498732615876491253923875461145326978234957186789613524561284739"
+        
+        self.assertEqual(solution.solve(test_grid), solution.grid_values(answer_grid))
+
+    def test_can_solve_traditional_sudoku(self):
+        test_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+        answer_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+
+        self.assertEqual(solution.solve(test_grid), solution.grid_values(answer_grid))
+
+
+        
+
+
 
 class TestEnvironment(unittest.TestCase):
     """Test initial variables such as boxes, unitlist, unittest
     """
+    def test_eliminate_can_solve_undiagonal(self):
+        test_grid = ".763149588549627.39138752644681.73955974386211325.648732.789146641253879789641532"
+        answer_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+        self.assertEqual(solution.eliminate(solution.grid_values(test_grid), False), solution.grid_values(answer_grid))
+
+        test_grid = "..6314958854962713913875264.681273.559743862.132596487325789146641253879789641532"
+        answer_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+        self.assertEqual(solution.eliminate(solution.grid_values(test_grid), False), solution.grid_values(answer_grid))
+
+    def test_only_choice_can_solve_undiagonal(self):
+        test_grid = ".763149588549627139138752644.812739559.438621.32596487325789146641253879789641532"
+        answer_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+
+        self.assertEqual(solution.only_choice(solution.grid_values(test_grid), False), solution.grid_values(answer_grid))
+
+    def test_can_solve_method_take_str_input(self):
+        diagonal_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+        solved_diag_sudoku = {'G7': '8', 'G6': '9', 'G5': '7', 'G4': '3', 'G3': '2', 'G2': '4', 'G1': '6', 'G9': '5',
+                              'G8': '1', 'C9': '6', 'C8': '7', 'C3': '1', 'C2': '9', 'C1': '4', 'C7': '5', 'C6': '3',
+                              'C5': '2', 'C4': '8', 'E5': '9', 'E4': '1', 'F1': '1', 'F2': '2', 'F3': '9', 'F4': '6',
+                              'F5': '5', 'F6': '7', 'F7': '4', 'F8': '3', 'F9': '8', 'B4': '7', 'B5': '1', 'B6': '6',
+                              'B7': '2', 'B1': '8', 'B2': '5', 'B3': '3', 'B8': '4', 'B9': '9', 'I9': '3', 'I8': '2',
+                              'I1': '7', 'I3': '8', 'I2': '1', 'I5': '6', 'I4': '5', 'I7': '9', 'I6': '4', 'A1': '2',
+                              'A3': '7', 'A2': '6', 'E9': '7', 'A4': '9', 'A7': '3', 'A6': '5', 'A9': '1', 'A8': '8',
+                              'E7': '6', 'E6': '2', 'E1': '3', 'E3': '4', 'E2': '8', 'E8': '5', 'A5': '4', 'H8': '6',
+                              'H9': '4', 'H2': '3', 'H3': '5', 'H1': '9', 'H6': '1', 'H7': '7', 'H4': '2', 'H5': '8',
+                              'D8': '9', 'D9': '2', 'D6': '8', 'D7': '1', 'D4': '4', 'D5': '3', 'D2': '7', 'D3': '6',
+                              'D1': '5'}
+
+        self.assertEqual(solution.solve(diagonal_grid), solved_diag_sudoku)
+
+    def test_can_solve_method_take_dict_input(self):
+        diagonal_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+        solved_diag_sudoku = {'G7': '8', 'G6': '9', 'G5': '7', 'G4': '3', 'G3': '2', 'G2': '4', 'G1': '6', 'G9': '5',
+                              'G8': '1', 'C9': '6', 'C8': '7', 'C3': '1', 'C2': '9', 'C1': '4', 'C7': '5', 'C6': '3',
+                              'C5': '2', 'C4': '8', 'E5': '9', 'E4': '1', 'F1': '1', 'F2': '2', 'F3': '9', 'F4': '6',
+                              'F5': '5', 'F6': '7', 'F7': '4', 'F8': '3', 'F9': '8', 'B4': '7', 'B5': '1', 'B6': '6',
+                              'B7': '2', 'B1': '8', 'B2': '5', 'B3': '3', 'B8': '4', 'B9': '9', 'I9': '3', 'I8': '2',
+                              'I1': '7', 'I3': '8', 'I2': '1', 'I5': '6', 'I4': '5', 'I7': '9', 'I6': '4', 'A1': '2',
+                              'A3': '7', 'A2': '6', 'E9': '7', 'A4': '9', 'A7': '3', 'A6': '5', 'A9': '1', 'A8': '8',
+                              'E7': '6', 'E6': '2', 'E1': '3', 'E3': '4', 'E2': '8', 'E8': '5', 'A5': '4', 'H8': '6',
+                              'H9': '4', 'H2': '3', 'H3': '5', 'H1': '9', 'H6': '1', 'H7': '7', 'H4': '2', 'H5': '8',
+                              'D8': '9', 'D9': '2', 'D6': '8', 'D7': '1', 'D4': '4', 'D5': '3', 'D2': '7', 'D3': '6',
+                              'D1': '5'}
+        diagonal_grid = solution.grid_values(diagonal_grid)
+        self.assertEqual(solution.solve(diagonal_grid), solved_diag_sudoku)
+
+    def test_can_solve_method_return_error_when_wrong_input_type(self):
+        grid = list()
+        self.assertRaises(solution.WrongInputType, solve, grid)
 
     def test_rows_is_implemented(self):
         self.assertEqual(solution.rows, "ABCDEFGHI", msg="Define rows='ABCDEFGHI'")
@@ -131,6 +227,14 @@ class TestEnvironment(unittest.TestCase):
     def test_number_of_unitlist_is_29(self):
         # Because there 9 rows + 9 cols + 9 squares + 2 diagonal => 29 units
         self.assertEqual(len(solution.unitlist), 29, msg="Define unitlist = ")
+
+    def test_number_of_units_in_unitlist_undiagonal_is_27(self):
+        # Because there 9 rows + 9 cols + 9 squares  => 27 units
+        self.assertEqual(len(solution.unitlist_undiagonal), 27, msg="Define unitlist_undiagonal = ")
+
+    def test_each_box_has_3_units_when_undiagonal(self):
+        # Row (1) + ColumN(1) + Square(1)
+        self.assertTrue(all([len(solution.units_undiagonal[box]) == 3 for box in solution.boxes]))
 
     def test_each_box_has_4_units(self):
         # Diagonal Non Center Box: There are 4 constraints: row unit, column unit, square units, diagonal units
@@ -177,14 +281,24 @@ class TestEnvironment(unittest.TestCase):
         result = solution.eliminate(values)
         only_choice_result = solution.only_choice(result)
         self.assertEqual(type(only_choice_result), dict)
-        #self.assertEqual(only_choice_result, {'A1': '45', 'A2': '8', 'A3': '3', 'A4': '9', 'A5': '2', 'A6': '1', 'A7': '6', 'A8': '5789', 'A9': '57', 'B1': '9', 'B2': '6', 'B3': '47', 'B4': '3', 'B5': '4', 'B6': '5', 'B7': '8', 'B8': '278', 'B9': '1', 'C1': '2', 'C2': '257', 'C3': '1', 'C4': '8', 'C5': '7', 'C6': '6', 'C7': '4', 'C8': '23579', 'C9': '2357', 'D1': '345', 'D2': '345', 'D3': '8', 'D4': '1', 'D5': '3456', 'D6': '2', 'D7': '9', 'D8': '34567', 'D9': '34567', 'E1': '7', 'E2': '2', 'E3': '9', 'E4': '5', 'E5': '34569', 'E6': '4', 'E7': '1', 'E8': '13456', 'E9': '8', 'F1': '1345', 'F2': '13459', 'F3': '6', 'F4': '7', 'F5': '3459', 'F6': '8', 'F7': '2', 'F8': '1345', 'F9': '345', 'G1': '134', 'G2': '1347', 'G3': '2', 'G4': '6', 'G5': '8', 'G6': '9', 'G7': '5', 'G8': '1478', 'G9': '47', 'H1': '8', 'H2': '1467', 'H3': '47', 'H4': '2', 'H5': '5', 'H6': '3', 'H7': '17', 'H8': '6', 'H9': '9', 'I1': '6', 'I2': '9', 'I3': '5', 'I4': '4', 'I5': '1', 'I6': '7', 'I7': '3', 'I8': '8', 'I9': '2'})
+
+        test_grid = dict([(box, "23456789") for box in solution.boxes])
+        test_grid["A1"] = "123456789"
+
+        expected_grid = dict([(box, "23456789") for box in solution.boxes])
+        expected_grid["A1"] = "1"
+        self.assertEqual(solution.only_choice(test_grid), expected_grid)
 
     def test_eliminate(self):
         grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
         values = solution.grid_values(grid)
         result = solution.eliminate(values)
         self.assertEqual(type(result), dict)
-        #self.assertEqual(result, {'A1': '45', 'A2': '4578', 'A3': '3', 'A4': '49', 'A5': '2', 'A6': '147', 'A7': '6', 'A8': '5789', 'A9': '57', 'B1': '9', 'B2': '24678', 'B3': '47', 'B4': '3', 'B5': '47', 'B6': '5', 'B7': '78', 'B8': '278', 'B9': '1', 'C1': '25', 'C2': '257', 'C3': '1', 'C4': '8', 'C5': '79', 'C6': '6', 'C7': '4', 'C8': '23579', 'C9': '2357', 'D1': '345', 'D2': '345', 'D3': '8', 'D4': '1', 'D5': '3456', 'D6': '2', 'D7': '9', 'D8': '34567', 'D9': '34567', 'E1': '7', 'E2': '123459', 'E3': '49', 'E4': '459', 'E5': '34569', 'E6': '4', 'E7': '1', 'E8': '13456', 'E9': '8', 'F1': '1345', 'F2': '13459', 'F3': '6', 'F4': '7', 'F5': '3459', 'F6': '8', 'F7': '2', 'F8': '1345', 'F9': '345', 'G1': '134', 'G2': '1347', 'G3': '2', 'G4': '6', 'G5': '478', 'G6': '9', 'G7': '5', 'G8': '1478', 'G9': '47', 'H1': '8', 'H2': '1467', 'H3': '47', 'H4': '2', 'H5': '457', 'H6': '3', 'H7': '17', 'H8': '1467', 'H9': '9', 'I1': '46', 'I2': '4679', 'I3': '5', 'I4': '4', 'I5': '1', 'I6': '47', 'I7': '3', 'I8': '24678', 'I9': '2467'})
+
+        answer_grid = "289354176437861259615927348956132784178546923324789615741695832593278461862413597"
+        grid = solution.grid_values(answer_grid)
+        grid["A1"] = "289"
+        self.assertEqual(solution.eliminate(grid), solution.grid_values(answer_grid))
 
     def test_reduce_puzzle(self):
         grid = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'

@@ -1,3 +1,5 @@
+from itertools import combinations
+
 assignments = []
 
 
@@ -12,7 +14,7 @@ def assign_value(values, box, value):
     return values
 
 
-def naked_twins(values):
+def naked_twins(values, diagonal=True):
     """Eliminate values using the naked twins strategy.
     Args:
         values(dict): a dictionary of the form {'box_name': '123456789', ...}
@@ -25,24 +27,19 @@ def naked_twins(values):
     # Eliminate the naked twins as possibilities for their peers
     possible_unsolved_boxes = [box for box in boxes if len(values[box]) == 2]
 
-    for i in range(len(possible_unsolved_boxes) - 1):
-        first_box = possible_unsolved_boxes[i]
-        digits = values[first_box]
-        for j in range(i + 1, len(possible_unsolved_boxes)):
-            second_box = possible_unsolved_boxes[j]
+    if len(possible_unsolved_boxes) >= 2:
+        for first_box, second_box in combinations(possible_unsolved_boxes, 2):
+            first_box_digit = values[first_box]
+            second_box_digit = values[second_box]
 
-            # if they have same value
-            # check if they belong to the same unit
+            # If they have same value, check if they belong to the same unit
             # if true, it's naked twins
-            if values[second_box] == digits:
-                for unit in units[first_box]:
-                    if second_box in unit:
-                        # Found Naked Twins:
-                        # if Found, remove the digit from its peers except the naked twins
-                        for box in unit:
-                            if box not in (first_box, second_box):
-                                for digit in digits:
-                                    values = assign_value(values, box, values[box].replace(digit, ''))
+            if first_box_digit == second_box_digit:
+                # Received the feedback (Changed to List Comprehension instead of explicit for loop)
+                if diagonal:
+                    [[[assign_value(values, box, values[box].replace(digit, '')) for digit in first_box_digit] for box in unit if not box in (first_box, second_box)] for unit in [unit for unit in units[first_box] if second_box in unit]]
+                else:
+                    [[[assign_value(values, box, values[box].replace(digit, '')) for digit in first_box_digit] for box in unit if not box in (first_box, second_box)] for unit in [unit for unit in units_undiagonal[first_box] if second_box in unit]]
 
     return values
 
@@ -87,7 +84,7 @@ def display(values):
 
     return msg
 
-def eliminate(values):
+def eliminate(values, diagonal=True):
     """Remove the digit of each known places from its peers
 
     Args:
@@ -102,18 +99,26 @@ def eliminate(values):
     solved_places = [box for box in boxes if len(values[box]) == 1]
     for box in solved_places:
         digit = values[box]
-        its_peers = peers[box]
+        if diagonal:
+            its_peers = peers[box]
+        else:
+            its_peers = peers_undiagonal[box]
         for peer in its_peers:
             values = assign_value(values, peer, values[peer].replace(digit, ''))
 
     return values
 
 
-def only_choice(values):
+def only_choice(values, diagonal=True):
     # for box in each unit
     # check if a box has unique digit among boxes in the same unit
     # if it does, the box should have that digit assigned
-    for unit in unitlist:
+    if not diagonal:
+        unit_list = unitlist_undiagonal
+    else:
+        unit_list = unitlist
+
+    for unit in unit_list:
         for digit in '123456789':
             digit_places = [box for box in unit if digit in values[box]]
             if len(digit_places) == 1:
@@ -121,7 +126,7 @@ def only_choice(values):
     return values
 
 
-def reduce_puzzle(values):
+def reduce_puzzle(values, diagonal=True):
     stalled = False
 
     while not stalled:
@@ -130,9 +135,9 @@ def reduce_puzzle(values):
         # if one box has length of 0, there is a problem => return False
         before_reduce_values = values.copy()
 
-        values = eliminate(values)
-        values = only_choice(values)
-        values = naked_twins(values)
+        values = eliminate(values, diagonal)
+        values = only_choice(values, diagonal)
+        values = naked_twins(values, diagonal)
 
         after_reduce_values = values
 
@@ -154,11 +159,23 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
-    values = grid_values(grid)
-    return search(values)
+    if isinstance(grid, str):
+        values = grid_values(grid)
+    elif isinstance(grid, dict):
+        values = grid
+    else:
+        raise WrongInputType("Unknown Input Type for solve(grid)")
 
-def search(values):
-    values = reduce_puzzle(values)
+    values_save = values.copy()
+    result = search(values)
+    if not result:
+        #If it can't solve diagoanl sudoku, solve traditional sudokus
+        return search(values_save, diagonal=False)
+    return result
+
+
+def search(values, diagonal=True):
+    values = reduce_puzzle(values, diagonal)
     if not values:
         # reduce_puzzle can't solve -> return False
         return values
@@ -176,7 +193,7 @@ def search(values):
         values_copy = values.copy()
         values_copy[min_box] = i
 
-        result = search(values_copy)
+        result = search(values_copy, diagonal)
 
         if result:
             # only return when result has some values 
@@ -205,10 +222,14 @@ diagonal_units = [[r + c for r, c in zip(rows, cols)]] + [[r + c for r, c in zip
 # diag2 = from right-top to left-bottom
 
 unitlist = row_units + col_units + square_units + diagonal_units
+unitlist_undiagonal = row_units + col_units + square_units
 
-units = dict([(box, [unit for unit in unitlist if box in unit])
-              for box in boxes])
+units = dict([(box, [unit for unit in unitlist if box in unit]) for box in boxes])
+units_undiagonal = dict([(box, [unit for unit in unitlist_undiagonal if box in unit]) for box in boxes])
+
 peers = dict([(box, set(sum(units[box], [])) - set([box])) for box in boxes])
+peers_undiagonal = dict([(box, set(sum(units_undiagonal[box], [])) - set([box])) for box in boxes])
+class WrongInputType(Exception): pass 
 ##### Global Variables ENDS HERE #####
 
 if __name__ == '__main__':
