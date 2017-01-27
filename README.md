@@ -36,6 +36,8 @@
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
 A: In *this diagonal sudoku*, there are **four constraints** (rows, columns, square, diagonal), which simply means there should be no duplicate number in each row, column, square, and diagonal. With constraints, we can build a strategy like if one single digit is determined in one box then other boxes in the same row, column, squares, and diagonal should not have that digit. So, a **constraint propagation**  approach is used to solve a sudoku puzzle. It means:  
+
+
 1. Apply one strategy to eliminate variables (in this case, digits) by checking its constraints
 2. With reduced variables from previous step, apply another strategy to reduce more variables
 3. Repeat 1-2 until we find a solution
