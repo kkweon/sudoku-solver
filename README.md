@@ -73,6 +73,20 @@ If not, please see how to download pygame [here](http://www.pygame.org/download.
 * `PySudoku.py` - Do not modify this. This is code for visualizing your solution.
 * `visualize.py` - Do not modify this. This is code for visualizing your solution.
 
+
+### Additional Codes
+* `solver.py` - Run & Analyze multiple sudoku puzzles. Example of this looks like this (measured in seconds):  
+
+> min_time: 0.04237818717956543  
+> max_time: 8.132559061050415  
+> avg_time: 0.501680519580841  
+> rate: 1.0  
+
+* `test_solver.py` - Unittest for `solver.py`
+* [`/data/easy1011.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/easy1011.txt) - Easy Sudoku Puzzles of 1,011.
+* [`/data/hard2365.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/hard2365.txt) - Hard Sudoku Puzzles of 2,365.
+
+
 ### Visualizing
 
 To visualize your solution, please only assign values to the values_dict using the ```assign_values``` function provided in solution.py
