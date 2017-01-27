@@ -39,34 +39,40 @@ def analyze_all(data, cores=4):
         'min_time': min(time_list),
         'max_time': max(time_list),
         'avg_time': sum(time_list) / len(time_list),
-        'rate': get_success_rate(success_rate_list)
+        'solve_rate': get_success_rate(success_rate_list)
     }
 
     return result 
+
+def main(path, sample=False, label="Hard"):
+    data = read_data(path)
+    if sample:
+        data = random.sample(data, sample)
+    else:
+        sample = len(data)
+    result = analyze_all(data)
+
+    print(f"Solving [{label}] Puzzles of {sample}")
+    for k, v in result.items():
+        if k == "solve_rate":
+            print(f"{k}\t: {v:.2%}")
+        else:
+            print(f"{k}\t: {v:.3f}")
 
 if __name__ == '__main__':
     easy_trial = 100
     hard_trial = 100
 
-
     easy_path = "data/easy1011.txt"
-    data = read_data(easy_path)
-    data = random.sample(data, easy_trial)
-    result = analyze_all(data)
-
-    print(f"Solving [Easy] Puzzles of {easy_trial}")
-    for k, v in result.items():
-        print(f"{k}: {v}")
-
-
     hard_path = "data/hard2365.txt"
-    data = read_data(hard_path)
-    data = random.sample(data, hard_trial)
-    result = analyze_all(data)
+    norvig_path = "data/top95.txt"
+    norvig_hardest_path = "data/hardest11.txt"
 
-    print(f"\nSolving [Hard] Puzzles of {hard_trial}")
-    for k, v in result.items():
-        print(f"{k}: {v}")
+    main(easy_path, easy_trial, "Easy")
+    main(hard_path, hard_trial, "Hard")
+
+    main(norvig_path, label="Norvig 95")
+    main(norvig_hardest_path, label="Norvig Hardest 11")
 
     
 

@@ -70,7 +70,7 @@ class TestMultiProcess(unittest.TestCase):
         min_time = result["min_time"]
         max_time = result["max_time"]
         avg_time = result['avg_time']
-        success_rate = result['rate']
+        success_rate = result['solve_rate']
 
         for k in result:
             self.assertEqual(type(result[k]), float)

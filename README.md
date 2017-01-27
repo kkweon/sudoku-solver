@@ -85,8 +85,35 @@ If not, please see how to download pygame [here](http://www.pygame.org/download.
 * `test_solver.py` - Unittest for `solver.py`
 * [`/data/easy1011.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/easy1011.txt) - Easy Sudoku Puzzles of 1,011.
 * [`/data/hard2365.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/hard2365.txt) - Hard Sudoku Puzzles of 2,365.
+* [`/data/top95.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/top95.txt) - Top 95 Difficult Puzzles from [Peter Norvig](http://norvig.com/sudoku.html)
+* [`/data/hardest11.txt`](https://github.com/kkweon/sudoku-solver/blob/master/data/hardest11.txt) - Hardest 11 Puzzles from [Peter Norvig](http://norvig.com/sudoku.html)
 
+### Performance
+```
+Solving [Easy] Puzzles of 100
+min_time	: 0.028
+max_time	: 0.394
+avg_time	: 0.093
+solve_rate	: 100.00%
 
+Solving [Hard] Puzzles of 100
+min_time	: 0.051
+max_time	: 1.897
+avg_time	: 0.474
+solve_rate	: 100.00%
+
+Solving [Norvig 95] Puzzles of 95
+min_time	: 0.072
+max_time	: 11.363
+avg_time	: 1.139
+solve_rate	: 100.00%
+
+Solving [Norvig Hardest 11] Puzzles of 11
+min_time	: 0.109
+max_time	: 0.799
+avg_time	: 0.371
+solve_rate	: 100.00%
+```
 ### Visualizing
 
 To visualize your solution, please only assign values to the values_dict using the ```assign_values``` function provided in solution.py
