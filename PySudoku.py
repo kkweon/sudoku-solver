@@ -22,7 +22,7 @@ def play(values_list):
     # a random number to fill in here or accept user
     # input for a duplicatable puzzle.
 
-    for values in values_list:
+    for i, values in enumerate(values_list):
         pygame.event.pump()
         theSquares = []
         initXLoc = 0
@@ -54,10 +54,13 @@ def play(values_list):
         pygame.display.update()
         clock.tick(5)
 
+        if i == 0:
+            pygame.image.save(screen, './images/game_begin.jpg')
     # leave game showing until closed by user
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.image.save(screen, './images/game_end.jpg')
                 pygame.quit()
                 quit()
 
