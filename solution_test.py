@@ -132,7 +132,7 @@ class TestDiagonalSudoku(unittest.TestCase):
         self.assertEqual(solution.solve(test_grid), solution.grid_values(answer_grid))
 
     def test_can_solve_traditional_sudoku(self):
-        test_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
+        test_grid   = "2763.49588549.2713913875.6446812739.597438621.32596487.25789.46641253879789641532"
         answer_grid = "276314958854962713913875264468127395597438621132596487325789146641253879789641532"
 
         self.assertEqual(solution.solve(test_grid), solution.grid_values(answer_grid))
